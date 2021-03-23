@@ -1,24 +1,26 @@
-import React, { Component } from 'react';
-import getFetch from './services/apiPixabay';
-import Searchbar from './components/Searchbar/Searchbar';
-import ImageGallery from './components/ImageGallery/ImageGallery';
-import Button from './components/Button/Button';
-
-import Modal from './components/Modal/Modal';
- 
+import React, { Component } from "react";
+import getFetch from "./services/apiPixabay";
+import Searchbar from "./components/Searchbar/Searchbar";
+import ImageGallery from "./components/ImageGallery/ImageGallery";
+import Button from "./components/Button/Button";
+import Modal from "./components/Modal/Modal";
+import Loader from "./components/Loader/Loader";
 
 class App extends Component {
   state = {
-    sQuery: '',
+    sQuery: "",
     page: 1,
     perPage: 12,
     gallery: [],
     isLoading: false,
-    error: null,
+    error: false,
     scroll: false,
     showModal: false,
-    largeImageURL: null,
+    largeImageURL: "",
+    tags: "",
   };
+
+  componentDidMount() {}
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.sQuery !== this.state.sQuery) {
@@ -27,17 +29,16 @@ class App extends Component {
     if (this.state.scroll === true) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }
 
-  onChangeQuery = query => {
+  onChangeQuery = (query) => {
     this.setState({
       sQuery: query,
       page: 1,
       gallery: [],
-      error: null,
     });
   };
 
@@ -47,14 +48,13 @@ class App extends Component {
     this.setState({ isLoading: true });
 
     getFetch(sQuery, page, perPage)
-      .then(gallery => {
-        console.log(gallery);
-        this.setState(prevState => ({
+      .then((gallery) => {
+        this.setState((prevState) => ({
           gallery: [...prevState.gallery, ...gallery],
           page: prevState.page + 1,
         }));
       })
-      .catch(error => this.setState({ error }))
+      .catch((error) => this.setState({ error }))
       .finally(() => this.setState({ isLoading: false }));
   };
 
@@ -65,29 +65,41 @@ class App extends Component {
     }
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  getLargeImageURL = (largeImageURL) => {
-    this.toggleModal();
-    this.setState({ largeImageURL });
+  toggleModal = (largeImageURL, tags) => {
+    this.setState({ tags: tags });
+    this.setState({ largeImageURL: largeImageURL });
+    this.setState({ scroll: false });
+    this.setState({ showModal: !this.state.showModal });
   };
 
   render() {
-    const { gallery, isLoading, showModal } = this.state;
+    const {
+      gallery,
+      isLoading,
+      error,
+      showModal,
+      largeImageURL,
+      tags,
+    } = this.state;
     const shouldRenderLoadMoreButton = gallery.length > 0 && !isLoading;
     return (
       <>
-      {showModal && (
-              <Modal toggleModal={this.toggleModal} getLargeImageURL={this.getLargeImageURL}> 
-              </Modal>
-            )}
+        {error && <p>Sorry, error</p>}
         <Searchbar onSubmit={this.onChangeQuery} />
-        <ImageGallery gallery={gallery} />
+        {gallery.length > 0 && (
+          <ImageGallery gallery={gallery} onClose={this.toggleModal} />
+        )}
+        {isLoading && <Loader />}
+
         {shouldRenderLoadMoreButton && <Button onClick={this.loadMoreButton} />}
+
+        {showModal && (
+          <Modal
+            onClose={this.toggleModal}
+            largeImageURL={largeImageURL}
+            tags={tags}
+          />
+        )}
       </>
     );
   }
