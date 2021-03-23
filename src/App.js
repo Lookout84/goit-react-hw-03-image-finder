@@ -4,6 +4,9 @@ import Searchbar from './components/Searchbar/Searchbar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Button from './components/Button/Button';
 
+import Modal from './components/Modal/Modal';
+ 
+
 class App extends Component {
   state = {
     sQuery: '',
@@ -13,6 +16,8 @@ class App extends Component {
     isLoading: false,
     error: null,
     scroll: false,
+    showModal: false,
+    largeImageURL: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -38,11 +43,10 @@ class App extends Component {
 
   fetchHits = () => {
     const { page, sQuery, perPage } = this.state;
-    const options = { sQuery, page, perPage };
 
     this.setState({ isLoading: true });
 
-    getFetch(options)
+    getFetch(sQuery, page, perPage)
       .then(gallery => {
         console.log(gallery);
         this.setState(prevState => ({
@@ -61,11 +65,26 @@ class App extends Component {
     }
   };
 
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
+
+  getLargeImageURL = (largeImageURL) => {
+    this.toggleModal();
+    this.setState({ largeImageURL });
+  };
+
   render() {
-    const { gallery, isLoading } = this.state;
+    const { gallery, isLoading, showModal } = this.state;
     const shouldRenderLoadMoreButton = gallery.length > 0 && !isLoading;
     return (
       <>
+      {showModal && (
+              <Modal toggleModal={this.toggleModal} getLargeImageURL={this.getLargeImageURL}> 
+              </Modal>
+            )}
         <Searchbar onSubmit={this.onChangeQuery} />
         <ImageGallery gallery={gallery} />
         {shouldRenderLoadMoreButton && <Button onClick={this.loadMoreButton} />}
