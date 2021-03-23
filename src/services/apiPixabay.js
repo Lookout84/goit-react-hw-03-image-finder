@@ -23,7 +23,7 @@ const getFetch = (query, page, perPage = 12) => {
   let key = `20004677-e0c621e42f0d912e7de39a0de`;
   return axios
     .get(
-      `https://pixabay.com/api/?key=${key}&q=${query}&image_type=photo&per_page=${perPage}&page=${page}`,
+      `https://pixabay.com/api/?image_type=photo&orientation=horizontal&q=${query}&page=${page}&per_page=${perPage}&key=${key}`,
     )
     .then(response => response.data.hits);
 };
