@@ -1,14 +1,14 @@
-import React, { Component } from "react";
-import getFetch from "./services/apiPixabay";
-import Searchbar from "./components/Searchbar/Searchbar";
-import ImageGallery from "./components/ImageGallery/ImageGallery";
-import Button from "./components/Button/Button";
-import Modal from "./components/Modal/Modal";
-import Loader from "./components/Loader/Loader";
+import React, { Component } from 'react';
+import getFetch from './services/apiPixabay';
+import Searchbar from './components/Searchbar/Searchbar';
+import ImageGallery from './components/ImageGallery/ImageGallery';
+import Button from './components/Button/Button';
+import Modal from './components/Modal/Modal';
+import Loader from './components/Loader/Loader';
 
 class App extends Component {
   state = {
-    sQuery: "",
+    sQuery: '',
     page: 1,
     perPage: 12,
     gallery: [],
@@ -16,8 +16,8 @@ class App extends Component {
     error: false,
     scroll: false,
     showModal: false,
-    largeImageURL: "",
-    tags: "",
+    largeImageURL: '',
+    tags: '',
   };
 
   componentDidMount() {}
@@ -29,12 +29,12 @@ class App extends Component {
     if (this.state.scroll === true) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     }
   }
 
-  onChangeQuery = (query) => {
+  onChangeQuery = query => {
     this.setState({
       sQuery: query,
       page: 1,
@@ -48,13 +48,15 @@ class App extends Component {
     this.setState({ isLoading: true });
 
     getFetch(sQuery, page, perPage)
-      .then((gallery) => {
-        this.setState((prevState) => ({
+      .then(data => data.hits)
+      .then(gallery => {
+        this.setState(prevState => ({
           gallery: [...prevState.gallery, ...gallery],
           page: prevState.page + 1,
+          hits: gallery.length,
         }));
       })
-      .catch((error) => this.setState({ error }))
+      .catch(error => this.setState({ error }))
       .finally(() => this.setState({ isLoading: false }));
   };
 
@@ -85,13 +87,15 @@ class App extends Component {
     return (
       <>
         {error && <p>Sorry, error</p>}
+
         <Searchbar onSubmit={this.onChangeQuery} />
+
         {gallery.length > 0 && (
           <ImageGallery gallery={gallery} onClose={this.toggleModal} />
         )}
-        {isLoading && <Loader />}
-
         {shouldRenderLoadMoreButton && <Button onClick={this.loadMoreButton} />}
+
+        {isLoading && <Loader />}
 
         {showModal && (
           <Modal

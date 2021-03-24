@@ -5,7 +5,7 @@ const getFetch = (query, page, perPage) => {
 
   let url = `https://pixabay.com/api/?image_type=photo&orientation=horizontal&q=${query}&page=${page}&per_page=${perPage}&key=${key}`;
 
-  return axios.get(url).then(response => response.data.hits);
+  return axios.get(url).then(response => response.data);
 }
 
 
